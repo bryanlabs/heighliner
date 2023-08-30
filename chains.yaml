@@ -610,8 +610,8 @@
 
 # Kujira
 - name: kujira
-  github-organization: Team-Kujira
-  github-repo: core
+  github-organization: PFC-developer
+  github-repo: kujira-core
   dockerfile: cosmos
   build-target: make install
   binaries:
