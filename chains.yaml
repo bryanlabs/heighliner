@@ -1013,7 +1013,7 @@
     - /go/bin/terpd
   build-env:
     - BUILD_TAGS=muslc
-
+      
 # Terra
 - name: terra
   github-organization: terra-money
@@ -1024,6 +1024,37 @@
     - /go/bin/terrad
   build-env:
     - BUILD_TAGS=muslc
+
+
+# Terra-classic
+- name: terra-classic
+  github-organization: classic-terra
+  github-repo: core
+  dockerfile: lunc
+  build-target: make install
+  binaries:
+    - /go/bin/terrad
+  build-env:
+    - BUILD_TAGS=muslc
+
+
+
+# Terra-Classic
+- name: terra-classicx
+  github-organization: classic-terra
+  github-repo: core
+  pre-build: |
+    apt update
+    wget http://dalnim.finance/terrad-$VERSION.tgz
+    tar xfz terrad-$VERSION.tgz
+    mv pkg/terrad /usr/bin
+    mv pkg/libwasmvm.x86_64.so /usr/lib
+  binaries:
+    - /usr/bin/terrad
+  libraries:
+    - /usr/lib/libwasmvm.x86_64.so
+  platforms:
+    - linux/amd64
 
 # Thorchain
 - name: thorchain
@@ -1066,6 +1097,19 @@
     - build/wasmd
   build-env:
     - BUILD_TAGS=muslc
+
+
+# White Whale
+- name: whitewhale
+  github-organization: White-Whale-Defi-Platform
+  github-repo: migaloo-chain
+  dockerfile: cosmos
+  build-target: make install
+  binaries:
+    - /go/bin/migalood
+  build-env:
+    - BUILD_TAGS=muslc
+
 
 # Wormchain (Wormhole Gateway)
 - name: wormchain

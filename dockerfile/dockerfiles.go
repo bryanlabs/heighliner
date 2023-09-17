@@ -31,3 +31,15 @@ var Cargo []byte
 
 //go:embed cargo/native.Dockerfile
 var CargoNative []byte
+
+//go:embed lunc/Dockerfile
+var Lunc []byte
+
+//go:embed lunc/native.Dockerfile
+var LuncNative []byte
+
+//go:embed lunc/local.Dockerfile
+var LuncLocal []byte
+
+//go:embed lunc/localcross.Dockerfile
+var LuncLocalCross []byte

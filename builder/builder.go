@@ -137,11 +137,25 @@ func rawDockerfile(
 			return dockerfileEmbeddedOrLocal("cosmos/Dockerfile", dockerfile.Cosmos)
 		}
 		return dockerfileEmbeddedOrLocal("cosmos/native.Dockerfile", dockerfile.CosmosNative)
+
 	case DockerfileTypeAvalanche:
 		if useBuildKit {
 			return dockerfileEmbeddedOrLocal("avalanche/Dockerfile", dockerfile.Avalanche)
 		}
 		return dockerfileEmbeddedOrLocal("avalanche/native.Dockerfile", dockerfile.AvalancheNative)
+
+	case DockerfileTypeLunc:
+		if local {
+			if useBuildKit {
+				return dockerfileEmbeddedOrLocal("lunc/localcross.Dockerfile", dockerfile.LuncLocalCross)
+			}
+			return dockerfile.LuncLocal
+		}
+		if useBuildKit {
+			return dockerfileEmbeddedOrLocal("lunc/Dockerfile", dockerfile.Lunc)
+		}
+		return dockerfileEmbeddedOrLocal("lunc/native.Dockerfile", dockerfile.LuncNative)
+
 	default:
 		return dockerfileEmbeddedOrLocal("none/Dockerfile", dockerfile.None)
 	}
@@ -220,12 +234,11 @@ func getModFile(
 	return goMod, nil
 }
 
-
 // getWasmvmVersion will get the wasmvm version from the mod file
 func getWasmvmVersion(modFile *modfile.File) string {
 	wasmvmRepo := "github.com/CosmWasm/wasmvm"
 	wasmvmVersion := ""
-	
+
 	// First check all the "requires"
 	for _, item := range modFile.Require {
 		// Must have 2 tokens, repo & version
@@ -241,12 +254,11 @@ func getWasmvmVersion(modFile *modfile.File) string {
 			wasmvmVersion = item.Syntax.Token[len(item.Syntax.Token)-1]
 		}
 	}
-	
+
 	fmt.Println("WasmVM version from go.mod: ", wasmvmVersion)
 
 	return wasmvmVersion
 }
-
 
 // buildChainNodeDockerImage builds the requested chain node docker image
 // based on the input configuration.
