@@ -92,7 +92,6 @@
     apk add --no-cache jq direnv
   binaries:
     - /go/bin/akash
-
 # Andromeda
 - name: andromeda
   github-organization: andromedaprotocol
@@ -101,6 +100,17 @@
   build-target: make install
   binaries:
     - /go/bin/andromedad
+  build-env:
+    - BUILD_TAGS=muslc
+
+# Archway
+- name: archway
+  github-organization: archway-network
+  github-repo: archway
+  dockerfile: cosmos
+  build-target: make build
+  binaries:
+    - build/archwayd
   build-env:
     - BUILD_TAGS=muslc
 
@@ -523,6 +533,21 @@
   build-env:
     - BUILD_TAGS=muslc
 
+# hyperlane agents
+- name: hyperlane-agents
+  github-organization: hyperlane-xyz
+  github-repo: hyperlane-monorepo
+  dockerfile: cargo
+  build-dir: rust
+  build-target: |
+    sed -i '/channel/c\channel = "nightly"' ../rust-toolchain
+    rustup toolchain install nightly
+    rustup component add rust-src --toolchain nightly-$(uname -m)-unknown-linux-gnu
+    cargo build --release --bin validator --bin relayer -Zbuild-std
+  binaries:
+    - /build/hyperlane-monorepo/rust/target/${ARCH}-unknown-linux-gnu/release/validator
+    - /build/hyperlane-monorepo/rust/target/${ARCH}-unknown-linux-gnu/release/relayer
+
 # hyperlane sim (for testing)
 - name: hyperlane-simd
   github-organization: strangelove-ventures
@@ -673,6 +698,15 @@
   build-target: make install
   binaries:
     - /go/bin/lumd
+
+# Migaloo
+- name: migaloo
+  github-organization: White-Whale-Defi-Platform
+  github-repo: migaloo-chain
+  dockerfile: cosmos
+  build-target: make install
+  binaries:
+    - /go/bin/migalood
 
 # Nomic
 - name: nomic
@@ -1013,7 +1047,7 @@
     - /go/bin/terpd
   build-env:
     - BUILD_TAGS=muslc
-      
+
 # Terra
 - name: terra
   github-organization: terra-money
@@ -1024,7 +1058,6 @@
     - /go/bin/terrad
   build-env:
     - BUILD_TAGS=muslc
-
 
 # Terra-classic
 - name: terra-classic
