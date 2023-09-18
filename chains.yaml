@@ -699,6 +699,18 @@
   binaries:
     - /go/bin/lumd
 
+# Mars
+- name: mars
+  github-organization: mars-protocol
+  github-repo: hub
+  dockerfile: cosmos
+  build-target: make install
+  build-env:
+    - BUILD_TAGS=muslc
+  binaries:
+    - /go/bin/marsd
+
+
 # Migaloo
 - name: migaloo
   github-organization: White-Whale-Defi-Platform
@@ -1070,24 +1082,6 @@
   build-env:
     - BUILD_TAGS=muslc
 
-
-
-# Terra-Classic
-- name: terra-classicx
-  github-organization: classic-terra
-  github-repo: core
-  pre-build: |
-    apt update
-    wget http://dalnim.finance/terrad-$VERSION.tgz
-    tar xfz terrad-$VERSION.tgz
-    mv pkg/terrad /usr/bin
-    mv pkg/libwasmvm.x86_64.so /usr/lib
-  binaries:
-    - /usr/bin/terrad
-  libraries:
-    - /usr/lib/libwasmvm.x86_64.so
-  platforms:
-    - linux/amd64
 
 # Thorchain
 - name: thorchain
