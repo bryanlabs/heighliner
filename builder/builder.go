@@ -368,7 +368,7 @@ func (h *HeighlinerBuilder) buildChainNodeDockerImage(
 	var wasmvmVersion string
 	race := ""
 
-	if dockerfile == DockerfileTypeCosmos || dockerfile == DockerfileTypeAvalanche {
+	if dockerfile == DockerfileTypeCosmos || dockerfile == DockerfileTypeAvalanche || dockerfile == DockerfileTypeLunc {
 		modFile, err := getModFile(
 			repoHost, chainConfig.Build.GithubOrganization, chainConfig.Build.GithubRepo,
 			chainConfig.Ref, chainConfig.Build.BuildDir, h.local,
