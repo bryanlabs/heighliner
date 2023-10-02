@@ -87,9 +87,12 @@
   github-organization: akash-network
   github-repo: node
   dockerfile: cosmos
-  build-target: make install
-  pre-build:
-    apk add --no-cache jq direnv
+  build-target: |
+    apk add --update nodejs npm jq direnv
+    direnv allow
+    eval $(direnv export bash)
+    export GOVERSION=$(./script/tools.sh gotoolchain | sed 's/go*//')
+    make install
   binaries:
     - /go/bin/akash
 
@@ -243,6 +246,18 @@
   build-env:
     - BUILD_TAGS=muslc
 
+# Notional Labs Composable
+- name: composable-cosmos
+  github-organization: notional-labs
+  github-repo: composable-centauri
+  dockerfile: cosmos
+  build-env:
+    - BUILD_TAGS=muslc
+  build-target: make build
+  binaries:
+    - /go/src/github.com/notional-labs/composable-centauri/bin/centaurid
+
+
 # Canto
 - name: canto
   github-organization: Canto-Network
@@ -338,6 +353,15 @@
     - BUILD_TAGS=muslc
   binaries:
     - /go/bin/comdex
+
+# CometBFT
+- name: cometbft
+  github-organization: cometbft
+  github-repo: cometbft
+  dockerfile: cosmos
+  build-target: make build
+  binaries:
+    - /go/src/github.com/cometbft/cometbft/build/cometbft
 
 # Composable
 - name: composable
