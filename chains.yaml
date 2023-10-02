@@ -333,8 +333,8 @@
 
 # Chihuahua
 - name: chihuahua
-  #github-organization: ChihuahuaChain
-  github-organization: PFC-Validator
+  github-organization: ChihuahuaChain
+  #github-organization: PFC-Validator
   github-repo: chihuahua
   dockerfile: cosmos
   build-target: make install
@@ -685,7 +685,9 @@
 
 # Kujira
 - name: kujira
-  github-organization: PFC-developer
+  github-organization: Team-Kujira
+  # for 0.8.7/8 builds
+  #github-organization: PFC-developer  
   github-repo: kujira-core
   dockerfile: cosmos
   build-target: make install
