@@ -488,11 +488,13 @@
     - /go/bin/dualityd
 
 # dydx
+#    wget https://storage.googleapis.com/strangelove-public/dydx/dydxprotocold-${VERSION}-linux-amd64
 - name: dydx
   pre-build: |
     apt update
-    wget https://storage.googleapis.com/strangelove-public/dydx/dydxprotocold-${VERSION}-linux-amd64
-    mv dydxprotocold-${VERSION}-linux-amd64 /usr/bin/dydxprotocold
+    wget https://github.com/dydxprotocol/v4-chain/releases/download/protocol/${VERSION}/dydxprotocold-${VERSION}-linux-amd64.tar.gz
+    tar -zxvf dydxprotocold-v1.0.0-linux-amd64.tar.gz
+    mv build/dydxprotocold-${VERSION}-linux-amd64 /usr/bin/dydxprotocold
     chmod 755 /usr/bin/dydxprotocold
   binaries:
     - /usr/bin/dydxprotocold
@@ -696,9 +698,21 @@
 - name: kujira
   github-organization: Team-Kujira
   github-repo: core
+  dockerfile: cosmos
+  build-target: make install
+  binaries:
+    - /go/bin/kujirad
+  build-env:
+    - LEDGER_ENABLED=false
+    - BUILD_TAGS=muslc
+
+
+# Kujira-pfc
+- name: kujira-pfc
   # for 0.8.7/8 builds
-  #github-organization: PFC-developer  
-  #github-repo: kujira-core
+  github-organization: PFC-validator
+    #github-organization: PFC-developer  
+  github-repo: kujira-core
   dockerfile: cosmos
   build-target: make install
   binaries:
@@ -928,6 +942,8 @@
     - WITH_LEDGER=false
     - WITH_CLEVELDB=false
     - BUILD_TAGS=muslc musl dynamic
+
+
 
 # Quasar
 - name: quasar
