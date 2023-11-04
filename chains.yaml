@@ -307,14 +307,11 @@
 # Celestia
 - name: celestia
   github-organization: celestiaorg
-  github-repo: celestia-node
+  github-repo: celestia-app
   dockerfile: cosmos
-  build-target: |
-    versioningPath="github.com/celestiaorg/celestia-node/nodebuilder/node"
-    LDFLAGS="$LDFLAGS -X '${versioningPath}.buildTime=$(date)' -X '${versioningPath}.lastCommit=$(git rev-parse HEAD)' -X '${versioningPath}.semanticVersion=$(git describe --tags --dirty=-dev 2>/dev/null || git rev-parse --abbrev-ref HEAD)'"
-    go install -ldflags="$LDFLAGS" ./cmd/celestia
+  build-target: make install
   binaries: 
-    - /go/bin/celestia
+    - /go/bin/celestia-appd
 
 # Cerberus
 - name: cerberus
@@ -490,7 +487,6 @@
   binaries:
     - /go/bin/dualityd
 
-# dydx
 - name: dydx
   github-organization: dydxprotocol
   github-repo: v4-chain
@@ -499,6 +495,31 @@
   build-dir: protocol
   binaries:
     - /go/bin/dydxprotocold
+
+# dydx
+#    wget https://storage.googleapis.com/strangelove-public/dydx/dydxprotocold-${VERSION}-linux-amd64
+- name: dydx.x
+  pre-build: |
+    apt update
+    wget https://github.com/dydxprotocol/v4-chain/releases/download/protocol/${VERSION}/dydxprotocold-${VERSION}-linux-amd64.tar.gz
+    tar -zxvf dydxprotocold-v1.0.0-linux-amd64.tar.gz
+    mv build/dydxprotocold-${VERSION}-linux-amd64 /usr/bin/dydxprotocold
+    chmod 755 /usr/bin/dydxprotocold
+  binaries:
+    - /usr/bin/dydxprotocold
+  platforms:
+    - linux/amd64
+- name: dydxX
+  pre-build: |
+    apt update
+    wget https://github.com/dydxprotocol/v4-chain/releases/download/protocol/${VERSION}/dydxprotocold-${VERSION}-linux-amd64.tar.gz
+    tar -zxvf dydxprotocold-v1.0.0-linux-amd64.tar.gz
+    mv build/dydxprotocold-${VERSION}-linux-amd64 /usr/bin/dydxprotocold
+    chmod 755 /usr/bin/dydxprotocold
+  binaries:
+    - /usr/bin/dydxprotocold
+  platforms:
+    - linux/amd64
 
 # Emoney
 - name: emoney
@@ -697,9 +718,21 @@
 - name: kujira
   github-organization: Team-Kujira
   github-repo: core
+  dockerfile: cosmos
+  build-target: make install
+  binaries:
+    - /go/bin/kujirad
+  build-env:
+    - LEDGER_ENABLED=false
+    - BUILD_TAGS=muslc
+
+
+# Kujira-pfc
+- name: kujira-pfc
   # for 0.8.7/8 builds
-  #github-organization: PFC-developer  
-  #github-repo: kujira-core
+  github-organization: PFC-validator
+    #github-organization: PFC-developer
+  github-repo: kujira-core
   dockerfile: cosmos
   build-target: make install
   binaries:
@@ -963,8 +996,6 @@
   build-target: make build
   binaries:
     - build/quicksilverd
-  build-env:
-    - BUILD_TAGS=muslc
 
 # Regen
 - name: regen
