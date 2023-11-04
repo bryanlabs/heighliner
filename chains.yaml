@@ -307,11 +307,14 @@
 # Celestia
 - name: celestia
   github-organization: celestiaorg
-  github-repo: celestia-app
+  github-repo: celestia-node
   dockerfile: cosmos
-  build-target: make install
+  build-target: |
+    versioningPath="github.com/celestiaorg/celestia-node/nodebuilder/node"
+    LDFLAGS="$LDFLAGS -X '${versioningPath}.buildTime=$(date)' -X '${versioningPath}.lastCommit=$(git rev-parse HEAD)' -X '${versioningPath}.semanticVersion=$(git describe --tags --dirty=-dev 2>/dev/null || git rev-parse --abbrev-ref HEAD)'"
+    go install -ldflags="$LDFLAGS" ./cmd/celestia
   binaries: 
-    - /go/bin/celestia-appd
+    - /go/bin/celestia
 
 # Cerberus
 - name: cerberus
@@ -489,15 +492,13 @@
 
 # dydx
 - name: dydx
-  pre-build: |
-    apt update
-    wget https://storage.googleapis.com/strangelove-public/dydx/dydxprotocold-${VERSION}-linux-amd64
-    mv dydxprotocold-${VERSION}-linux-amd64 /usr/bin/dydxprotocold
-    chmod 755 /usr/bin/dydxprotocold
+  github-organization: dydxprotocol
+  github-repo: v4-chain
+  dockerfile: cosmos
+  build-target: make install
+  build-dir: protocol
   binaries:
-    - /usr/bin/dydxprotocold
-  platforms:
-    - linux/amd64
+    - /go/bin/dydxprotocold
 
 # Emoney
 - name: emoney
@@ -904,6 +905,8 @@
   build-target: make install
   binaries:
     - /go/bin/persistenceCore
+  build-env:
+    - BUILD_TAGS=muslc
 
 # Polkadot
 - name: polkadot
@@ -960,6 +963,8 @@
   build-target: make build
   binaries:
     - build/quicksilverd
+  build-env:
+    - BUILD_TAGS=muslc
 
 # Regen
 - name: regen
@@ -978,6 +983,18 @@
   build-target: make install
   binaries:
     - /go/bin/rizond
+
+# saga
+- name: saga
+  github-organization: sagaxyz
+  github-repo: ssc
+  dockerfile: cosmos
+  build-target: |
+    make install
+  binaries:
+    - /go/bin/sscd
+  build-env:
+    - BUILD_TAGS=muslc
 
 # Secret Network
 - name: secretnetwork

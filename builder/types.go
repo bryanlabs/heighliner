@@ -56,6 +56,8 @@ type HeighlinerDockerBuildConfig struct {
 	Platform          string
 	NoCache           bool
 	NoBuildCache      bool
+	GoVersion         string
+	AlpineVersion     string
 }
 
 type HeighlinerQueuedChainBuilds struct {

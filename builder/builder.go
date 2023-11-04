@@ -137,7 +137,6 @@ func rawDockerfile(
 			return dockerfileEmbeddedOrLocal("cosmos/Dockerfile", dockerfile.Cosmos)
 		}
 		return dockerfileEmbeddedOrLocal("cosmos/native.Dockerfile", dockerfile.CosmosNative)
-
 	case DockerfileTypeAvalanche:
 		if useBuildKit {
 			return dockerfileEmbeddedOrLocal("avalanche/Dockerfile", dockerfile.Avalanche)
@@ -161,6 +160,7 @@ func rawDockerfile(
 	}
 }
 
+/*
 // baseImageForGoVersion will determine the go version in go.mod and return the base image
 func baseImageForGoVersion(modFile *modfile.File) GoVersion {
 	goVersion := modFile.Go.Version
@@ -169,7 +169,7 @@ func baseImageForGoVersion(modFile *modfile.File) GoVersion {
 
 	return baseImageVersion
 }
-
+*/
 func getModFile(
 	repoHost string,
 	organization string,
@@ -238,7 +238,7 @@ func getModFile(
 func getWasmvmVersion(modFile *modfile.File) string {
 	wasmvmRepo := "github.com/CosmWasm/wasmvm"
 	wasmvmVersion := ""
-
+	
 	// First check all the "requires"
 	for _, item := range modFile.Require {
 		// Must have 2 tokens, repo & version
@@ -363,31 +363,29 @@ func (h *HeighlinerBuilder) buildChainNodeDockerImage(
 		buildTimestamp = strconv.FormatInt(time.Now().Unix(), 10)
 	}
 
-	var baseVersion string
-	var baseVer GoVersion
+	var gv GoVersion
 	var wasmvmVersion string
 	race := ""
 
+	modFile, err := getModFile(
+		repoHost, chainConfig.Build.GithubOrganization, chainConfig.Build.GithubRepo,
+		chainConfig.Ref, chainConfig.Build.BuildDir, h.local,
+	)
+
+	goVersion := buildCfg.GoVersion
+	if goVersion == "" && err == nil {
+		goVersion = modFile.Go.Version
+	}
+	if goVersion != "" {
+		gv = GetImageAndVersionForGoVersion(goVersion, buildCfg.AlpineVersion)
+	}
+
 	if dockerfile == DockerfileTypeCosmos || dockerfile == DockerfileTypeAvalanche || dockerfile == DockerfileTypeLunc {
-		modFile, err := getModFile(
-			repoHost, chainConfig.Build.GithubOrganization, chainConfig.Build.GithubRepo,
-			chainConfig.Ref, chainConfig.Build.BuildDir, h.local,
-		)
 		if err != nil {
 			return fmt.Errorf("error getting mod file: %w", err)
 		}
 
-		baseVer = baseImageForGoVersion(modFile)
 		wasmvmVersion = getWasmvmVersion(modFile)
-
-		baseVersion = GoDefaultImage // default, and fallback if go.mod parse fails
-
-		// In error case, fallback to default image
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			baseVersion = baseVer.Image
-		}
 
 		if h.race {
 			race = "true"
@@ -396,18 +394,8 @@ func (h *HeighlinerBuilder) buildChainNodeDockerImage(
 				imageTags[i] = imageTag + "-race"
 			}
 		}
-	} else {
-		// Try to get mod file for non-cosmos/non-avax dockerfile types.
-		// If no error, get go version, if error, continue on without go version.
-		// Agoric looks to be the only chain needing this.
-		modFile, err := getModFile(
-			repoHost, chainConfig.Build.GithubOrganization, chainConfig.Build.GithubRepo,
-			chainConfig.Ref, chainConfig.Build.BuildDir, h.local,
-		)
-		if err == nil {
-			baseVer = baseImageForGoVersion(modFile)
-		}
 
+		fmt.Printf("Go version from go.mod: %s, will build with version: %s image: %s\n", modFile.Go.Version, gv.Version, gv.Image)
 	}
 
 	fmt.Printf("Building image from %s, resulting docker image tags: +%v\n", buildFrom, imageTags)
@@ -419,7 +407,7 @@ func (h *HeighlinerBuilder) buildChainNodeDockerImage(
 
 	buildArgs := map[string]string{
 		"VERSION":             chainConfig.Ref,
-		"BASE_VERSION":        baseVersion,
+		"BASE_VERSION":        gv.Image,
 		"NAME":                chainConfig.Build.Name,
 		"BASE_IMAGE":          chainConfig.Build.BaseImage,
 		"REPO_HOST":           repoHost,
@@ -436,7 +424,7 @@ func (h *HeighlinerBuilder) buildChainNodeDockerImage(
 		"BUILD_TAGS":          buildTagsEnvVar,
 		"BUILD_DIR":           chainConfig.Build.BuildDir,
 		"BUILD_TIMESTAMP":     buildTimestamp,
-		"GO_VERSION":          baseVer.Version,
+		"GO_VERSION":          gv.Version,
 		"WASMVM_VERSION":      wasmvmVersion,
 		"RACE":                race,
 	}
